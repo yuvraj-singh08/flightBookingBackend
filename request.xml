@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<KIU_AirPriceRQ EchoToken="WS3DOCEXAMPLE" TimeStamp="2024-06-28T15:27:52+00:00" Target="Production"
+    Version="3.0" SequenceNmbr="1" PrimaryLangID="en-us">
+    <POS>
+        <Source AgentSine="PTYS3653X" TerminalID="PTYS36504R" ISOCountry="PA" ISOCurrency="USD">
+            <RequestorID Type="5" />
+            <BookingChannel Type="1" />
+        </Source>
+    </POS>
+    <AirItinerary>
+        <OriginDestinationOptions>
+            <OriginDestinationOption>
+                <FlightSegment DepartureDateTime="2024-07-02 18:30:00"
+                    ArrivalDateTime="2024-07-02 20:00:00" StopQuantity="0" FlightNumber="710"
+                    ResBookDesigCode="Y" JourneyDuration="01:30:00">
+                    <DepartureAirport LocationCode="SDQ" />
+                    <ArrivalAirport LocationCode="CCS" />
+                    <MarketingAirline Code="DO" />
+                </FlightSegment>
+            </OriginDestinationOption>
+            <OriginDestinationOption>
+                <FlightSegment DepartureDateTime="2024-07-02 21:10:00"
+                    ArrivalDateTime="2024-07-03 11:30:00" StopQuantity="0" FlightNumber="3410"
+                    ResBookDesigCode="Y" JourneyDuration="08:20:00">
+                    <DepartureAirport LocationCode="SDQ" />
+                    <ArrivalAirport LocationCode="MAD" />
+                    <MarketingAirline Code="2W" />
+                </FlightSegment>
+                <FlightSegment DepartureDateTime="2024-07-03 15:25:00"
+                    ArrivalDateTime="2024-07-03 18:45:00" StopQuantity="0" FlightNumber="894"
+                    ResBookDesigCode="B" JourneyDuration="09:20:00">
+                    <DepartureAirport LocationCode="MAD" />
+                    <ArrivalAirport LocationCode="CCS" />
+                    <MarketingAirline Code="ES" />
+                </FlightSegment>
+            </OriginDestinationOption>
+            <OriginDestinationOption>
+                <FlightSegment DepartureDateTime="2024-07-02 21:10:00"
+                    ArrivalDateTime="2024-07-03 11:30:00" StopQuantity="0" FlightNumber="3410"
+                    ResBookDesigCode="Y" JourneyDuration="08:20:00">
+                    <DepartureAirport LocationCode="SDQ" />
+                    <ArrivalAirport LocationCode="MAD" />
+                    <MarketingAirline Code="2W" />
+                </FlightSegment>
+                <FlightSegment DepartureDateTime="2024-07-03 14:45:00"
+                    ArrivalDateTime="2024-07-03 18:30:00" StopQuantity="0" FlightNumber="1505"
+                    ResBookDesigCode="Y" JourneyDuration="09:45:00">
+                    <DepartureAirport LocationCode="MAD" />
+                    <ArrivalAirport LocationCode="HAV" />
+                    <MarketingAirline Code="2W" />
+                </FlightSegment>
+                <FlightSegment DepartureDateTime="2024-07-03 23:30:00"
+                    ArrivalDateTime="2024-07-04 02:30:00" StopQuantity="0" FlightNumber="3497"
+                    ResBookDesigCode="Y" JourneyDuration="03:00:00">
+                    <DepartureAirport LocationCode="HAV" />
+                    <ArrivalAirport LocationCode="CCS" />
+                    <MarketingAirline Code="V0" />
+                </FlightSegment>
+            </OriginDestinationOption>
+        </OriginDestinationOptions>
+    </AirItinerary>
+    <TravelerInfoSummary>
+        <PriceRequestInformation>
+            <TPA_Extension>
+                <TourCode Type="N" />
+            </TPA_Extension>
+        </PriceRequestInformation>
+        <AirTravelerAvail>
+            <PassengerTypeQuantity Code="ADT" Quantity="1" />
+        </AirTravelerAvail>
+    </TravelerInfoSummary>
+</KIU_AirPriceRQ>
