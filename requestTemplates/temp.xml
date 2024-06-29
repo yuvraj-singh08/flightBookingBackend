@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<KIU_AirPriceRQ EchoToken="WS3DOCEXAMPLE" TimeStamp="2015-03-09T16:49:52+00:00" Target="Production"
+    Version="3.0" SequenceNmbr="1" PrimaryLangID="en-us">
+    <POS>
+        <Source AgentSine="PTYS3653X" TerminalID="PTYS36504R" ISOCountry="PA" ISOCurrency="USD">
+            <RequestorID Type="5" />
+            <BookingChannel Type="1" />
+        </Source>
+    </POS>
+    <AirItinerary>
+        <OriginDestinationOptions>
+            <OriginDestinationOption>
+                <FlightSegment DepartureDateTime="2024-07-02 18:30:00" ArrivalDateTime="2024-07-02 20:00:00" StopQuantity="0" FlightNumber="710" ResBookDesigCode="B" JourneyDuration="01:30:00">
+                    <DepartureAirport LocationCode="SDQ"/>
+                    <ArrivalAirport LocationCode="CCS"/>
+                    <MarketingAirline Code="DO"/>
+                </FlightSegment>
+            </OriginDestinationOption>
+            <OriginDestinationOption>
+                <FlightSegment DepartureDateTime="2024-07-02 18:30:00" ArrivalDateTime="2024-07-02 20:00:00" StopQuantity="0" FlightNumber="710" ResBookDesigCode="B" JourneyDuration="01:30:00">
+                    <DepartureAirport LocationCode="SDQ"/>
+                    <ArrivalAirport LocationCode="CCS"/>
+                    <MarketingAirline Code="DO"/>
+                </FlightSegment>
+            </OriginDestinationOption>
+            <OriginDestinationOption>
+                <FlightSegment DepartureDateTime="2024-07-02 18:30:00" ArrivalDateTime="2024-07-02 20:00:00" StopQuantity="0" FlightNumber="710" ResBookDesigCode="B" JourneyDuration="01:30:00">
+                    <DepartureAirport LocationCode="SDQ"/>
+                    <ArrivalAirport LocationCode="CCS"/>
+                    <MarketingAirline Code="DO"/>
+                </FlightSegment>
+            </OriginDestinationOption>
+        </OriginDestinationOptions>
+    </AirItinerary>
+    <TravelerInfoSummary>
+        <PriceRequestInformation>
+            <TPA_Extension>
+                <TourCode Type="N" />
+            </TPA_Extension>
+        </PriceRequestInformation>
+        <AirTravelerAvail>
+            <PassengerTypeQuantity Code="ADT" Quantity="1" />
+        </AirTravelerAvail>
+    </TravelerInfoSummary>
+</KIU_AirPriceRQ>

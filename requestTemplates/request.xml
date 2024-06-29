@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<KIU_AirPriceRQ EchoToken="1" TimeStamp="2024-06-27T05:52:23+00:00" Target="Production" Version="3.0" SequenceNmbr="1" PrimaryLangID="en-us" Type="Price" IncludeAncillaries="true">
+	<POS>
+      <Source AgentSine="PTYS3653X" TerminalID="PTYS36504R" ISOCountry="PA"  ISOCurrency="USD">
+			<RequestorID Type="5" />
+			<BookingChannel Type="1" />
+		</Source>
+	</POS>
+	<BookingReferenceID ID="LLALBY" />
+</KIU_AirPriceRQ>

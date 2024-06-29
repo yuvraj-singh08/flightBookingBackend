@@ -8,7 +8,8 @@ export const getAvailableFlights = async (data) => {
         from,
         to,
         cabinPref,
-        passengerQuantity
+        passengerQuantity,
+        dateString
     } = data;
     const response = await axiosInstance.post('', {
         user: process.env.USERID,
@@ -19,12 +20,12 @@ export const getAvailableFlights = async (data) => {
         <Source AgentSine="PTYS3653X" TerminalID="PTYS36504R" ISOCountry="PA" />
     </POS>
     <OriginDestinationInformation>
-        <DepartureDateTime>2024-07-02</DepartureDateTime>
+        <DepartureDateTime>${dateString}</DepartureDateTime>
         <OriginLocation LocationCode="${from}" />
         <DestinationLocation LocationCode="${to}" />
     </OriginDestinationInformation>
         <TravelPreferences MaxStopsQuantity="4">
-        <CabinPref Cabin="${cabinPref}" />
+        
     </TravelPreferences>
     <TravelerInfoSummary>
         <AirTravelerAvail>
@@ -86,7 +87,7 @@ export const getData = (segments) => {
             }
         })
         console.log(stopsDetails);
-        return stopsDetails
+        return {stopsDetails}
     })
     return flights;
 }
