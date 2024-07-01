@@ -149,6 +149,38 @@ app.get("/flightcreateorderget", (req, res) => {
   res.send(JSON.stringify(confirmOrder));
 });
 
+app.post("/combinedFlightSearch", async (req, res) => {
+  try {
+    const { from, to, departureDate } = req.body;
+    const amadeusResponse = await amadeus.shopping.flightOffersSearch.get({
+      originLocationCode: from,
+      destinationLocationCode: to,
+      departureDate: departureDate,
+      adults: "1",
+    });
+
+    const kiuResponse = await axios.get('http://kiu-api.com/flights', {
+      params: {
+        from: from,
+        to: to,
+        departureDate: departureDate,
+      }
+    });
+
+    const amadeusFlights = JSON.parse(amadeusResponse.body);
+    const kiuFlights = kiuResponse.data;
+
+    const combinedFlights = {
+      amadeus: amadeusFlights,
+      kiu: kiuFlights,
+    };
+    res.json(combinedFlights);
+  } catch (error) {
+    console.error("Error in combined flight search:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, () => {
