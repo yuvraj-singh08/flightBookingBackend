@@ -102,6 +102,7 @@ app.post("/date", async (req, res) => {
 
 //Flight Offer Price by flightprice (post) endpoint 
 // The body will have departure, arrival, locationDeparture, locationArrival
+
 app.post('/flightprice', async (req, res) => {
 
   console.log("Body =",req.body);
@@ -117,7 +118,10 @@ app.post('/flightprice', async (req, res) => {
     });
 
     // Extract relevant data for flight pricing
-    const flightOffer = flightOffersSearchResponse.data[0]; // Assuming data structure matches
+    // const flightOffer = flightOffersSearchResponse.data[0]; // This method will select the first offer always
+    // The below mentioned method will select the lowest price from the flight offer search
+    const flightOffer = flightOffersSearchResponse.data.reduce((min, offer) => offer.price < min.price ? offer : min);
+
 
     // Perform flight pricing
     const flightPricingResponse = await amadeus.shopping.flightOffers.pricing.post(
@@ -136,6 +140,8 @@ app.post('/flightprice', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
 
 // Endpoint to get confirmed order
 app.get("/flightcreateorderget", (req, res) => {
@@ -170,49 +176,58 @@ app.get("/flightDates", async (req, res) => {
   }
 });
 
+// Nearest Airport 
+// {{base_url}}/airport?latitude=22.8056&longitude=86.2039
+app.get("/airport", async (req, res) => {
 
-// Combined flight search endpoint
-app.post("/combinedFlightSearch", async (req, res) => {
+  const {longitude,latitude}=req.query;
   try {
-    const { from, to, departureDate } = req.body;
+    
+    const response = await amadeus.referenceData.locations.airports.get({
+      longitude : longitude,
+      latitude  : latitude
+    })
 
-    // Example of Axios request with SSL certificate bypass
-    const kiuResponse = await axios.get('https://kiu-api.com/flights', {
-      params: {
-        from: from,
-        to: to,
-        departureDate: departureDate,
-      },
-      // SSL certificate bypass configuration
-      httpsAgent: new https.Agent({  
-        rejectUnauthorized: false
-      })
-    });
-
-    // Handle responses as needed
-    const kiuFlights = kiuResponse.data;
-
-    // Example Amadeus request
-    const amadeusResponse = await amadeus.shopping.flightOffersSearch.get({
-      originLocationCode: from,
-      destinationLocationCode: to,
-      departureDate: departureDate,
-      adults: "1",
-    });
-
-    const amadeusFlights = JSON.parse(amadeusResponse.body);
-
-    // Return combined flights
-    const combinedFlights = {
-      amadeus: amadeusFlights,
-      kiu: kiuFlights,
-    };
-    res.json(combinedFlights);
+    res.json(JSON.parse(response.body));
   } catch (error) {
-    console.error("Error in combined flight search:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error fetching nearest airport:", error);
+    res.status(500).json({
+      error: "Failed to fetch nearest airport "
+    });
   }
 });
+
+app.get("/Status", async (req, res) => {
+
+  const { carrierCode, flightNumber,scheduleDepartureDate } = req.query;
+
+  if (!carrierCode || !flightNumber || !scheduleDepartureDate) {
+    return res.status(400).json({
+      error: "Missing 'carrierCode' or 'flightNumber' or 'scheduleDepartureDate' query parameter"
+    });
+  }
+
+  try {
+    const response = await amadeus.schedule.flights.get({
+      carrierCode: carrierCode,
+      flightNumber: flightNumber,
+      scheduledDepartureDate: scheduleDepartureDate
+    })
+
+    res.json(JSON.parse(response.body));
+  } catch (error) {
+    console.error("Error fetching flight status:", error);
+    res.status(500).json({
+      error: "Failed to fetch flight status"
+    });
+  }
+});
+
+
+// Combined flight search endpoint of amadeus and kiu 
+
+
+
 
 const PORT = process.env.PORT || 8080;
 
