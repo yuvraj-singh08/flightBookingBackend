@@ -116,12 +116,10 @@ app.post('/flightprice', async (req, res) => {
       departureDate: departure,
       adults: 1
     });
-
-    // Extract relevant data for flight pricing
     // const flightOffer = flightOffersSearchResponse.data[0]; // This method will select the first offer always
     // The below mentioned method will select the lowest price from the flight offer search
-    const flightOffer = flightOffersSearchResponse.data.reduce((min, offer) => offer.price < min.price ? offer : min);
 
+    const flightOffer = flightOffersSearchResponse.data.reduce((min, offer) => offer.price < min.price ? offer : min);
 
     // Perform flight pricing
     const flightPricingResponse = await amadeus.shopping.flightOffers.pricing.post(
@@ -141,7 +139,53 @@ app.post('/flightprice', async (req, res) => {
   }
 });
 
+// Endpoint for flight create orders using book-flight (post) method 
+app.post('/book-flight', async (req, res) => {
+  const { origin, destination, departureDate, adults, traveler } = req.body;
 
+  try {
+    // Perform flight offers search
+    const flightOffersResponse = await amadeus.shopping.flightOffersSearch.get({
+      originLocationCode: origin,
+      destinationLocationCode: destination,
+      departureDate: departureDate,
+      adults: adults
+    });
+
+    // Extract the first flight offer from the search response
+    const firstFlightOffer = flightOffersResponse.data[0];
+
+    // Perform flight offers pricing
+    const pricingResponse = await amadeus.shopping.flightOffers.pricing.post(
+      JSON.stringify({
+        "data": {
+          "type": "flight-offers-pricing",
+          "flightOffers": [firstFlightOffer]
+        }
+      })
+    );
+
+    // Extract the priced flight offer
+    const pricedFlightOffer = pricingResponse.data.flightOffers[0];
+
+    // Perform flight booking
+    const bookingResponse = await amadeus.booking.flightOrders.post(
+      JSON.stringify({
+        'data': {
+          'type': 'flight-order',
+          'flightOffers': [pricedFlightOffer],
+          'travelers': [traveler]
+        }
+      })
+    );
+
+    // Send the booking response back to the client
+    res.json(bookingResponse.data);
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 // Endpoint to get confirmed orders
 app.get("/flightcreateorderget", (req, res) => {
@@ -224,6 +268,54 @@ app.get("/Status", async (req, res) => {
     res.status(500).json({
       error: "Failed to fetch flight status"
     });
+  }
+});
+
+//This endpoint is the mixture of flight-offer-search , flight offer price , flight create orders
+
+app.post('/book-cheapest-flight', async (req, res) => {
+  const { origin, destination, departureDate, adults, traveler } = req.body;
+
+  try {
+    // Step 1: Perform flight offers search
+    const flightOffersResponse = await amadeus.shopping.flightOffersSearch.get({
+      originLocationCode: origin,
+      destinationLocationCode: destination,
+      departureDate: departureDate,
+      adults: adults
+    });
+
+    // Step 2: Find the cheapest flight offer
+    const cheapestFlightOffer = flightOffersResponse.data.reduce((min, offer) => {
+      return offer.price.total < min.price.total ? offer : min;
+    }, flightOffersResponse.data[0]);
+
+    // Step 3: Perform flight offers pricing for the cheapest offer
+    const pricingResponse = await amadeus.shopping.flightOffers.pricing.post(
+      JSON.stringify({
+        "data": {
+          "type": "flight-offers-pricing",
+          "flightOffers": [cheapestFlightOffer]
+        }
+      })
+    );
+
+    // Step 4: Perform flight booking with the priced flight offer
+    const bookingResponse = await amadeus.booking.flightOrders.post(
+      JSON.stringify({
+        'data': {
+          'type': 'flight-order',
+          'flightOffers': [pricingResponse.data.flightOffers[0]],
+          'travelers': [traveler]
+        }
+      })
+    );
+
+    // Send the booking response back to the client
+    res.json(bookingResponse.data);
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
