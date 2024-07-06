@@ -143,14 +143,15 @@ app.post('/flightprice', async (req, res) => {
 
 
 
-// Endpoint to get confirmed order
+// Endpoint to get confirmed orders
 app.get("/flightcreateorderget", (req, res) => {
   res.send(JSON.stringify(confirmOrder));
 });
 
 
-// Endpoint to getFlight Cheapest Date Search 
+// Endpoint to getFlight Cheapest Date Search
 // example {{base_url}}/flightDates?origin=MAD&destination=MUC
+// It fetches the price of flights  around(full week) that date 
 app.get("/flightDates", async (req, res) => {
   console.log(req.query);
   const { origin, destination } = req.query;
@@ -178,6 +179,7 @@ app.get("/flightDates", async (req, res) => {
 
 // Nearest Airport 
 // {{base_url}}/airport?latitude=22.8056&longitude=86.2039
+// It fetches the nearest airport from that location
 app.get("/airport", async (req, res) => {
 
   const {longitude,latitude}=req.query;
@@ -197,6 +199,8 @@ app.get("/airport", async (req, res) => {
   }
 });
 
+// It fetches the status of the flight 
+// {{base_url}}/Status?carrierCode=AZ&flightNumber=319&scheduleDepartureDate=2024-07-08
 app.get("/Status", async (req, res) => {
 
   const { carrierCode, flightNumber,scheduleDepartureDate } = req.query;
