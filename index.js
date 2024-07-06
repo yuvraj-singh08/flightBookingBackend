@@ -58,7 +58,11 @@ app.get("/citySearch", async (req, res) => {
     }
 });
 
+
 // Flight offers search by date endpoint
+//http://localhost:8000/date?departure=2024-07-10
+//&arrival=2024-07-15&locationDeparture=JFK&locationArrival=LAX
+
 app.get("/date", async (req, res) => {
   const { departure, arrival, locationDeparture, locationArrival } = req.query;
 
@@ -82,6 +86,7 @@ app.post("/date", async (req, res) => {
   console.log(req.body);
   const { departure, arrival, locationDeparture, locationArrival } = req.body;
 
+
   try {
     const response = await amadeus.shopping.flightOffersSearch.get({
       originLocationCode: locationDeparture,
@@ -96,13 +101,18 @@ app.post("/date", async (req, res) => {
 });
 
 //Flight Offer Price by flightprice (post) endpoint 
+// The body will have departure, arrival, locationDeparture, locationArrival
 app.post('/flightprice', async (req, res) => {
+
+  console.log("Body =",req.body);
+
+  const { departure, arrival, locationDeparture, locationArrival } = req.body;
   try {
     // Perform flight offers search
     const flightOffersSearchResponse = await amadeus.shopping.flightOffersSearch.get({
-      originLocationCode: 'MAD',
-      destinationLocationCode: 'ATH',
-      departureDate: '2024-07-09',
+      originLocationCode: locationDeparture,
+      destinationLocationCode: locationArrival,
+      departureDate: departure,
       adults: 1
     });
 
@@ -125,13 +135,16 @@ app.post('/flightprice', async (req, res) => {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});// Endpoint to get confirmed order
+});
+
+// Endpoint to get confirmed order
 app.get("/flightcreateorderget", (req, res) => {
   res.send(JSON.stringify(confirmOrder));
 });
 
 
-// Endpoint to getFlight Cheapest Date Search
+// Endpoint to getFlight Cheapest Date Search 
+// example {{base_url}}/flightDates?origin=MAD&destination=MUC
 app.get("/flightDates", async (req, res) => {
   console.log(req.query);
   const { origin, destination } = req.query;
