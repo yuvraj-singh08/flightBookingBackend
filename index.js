@@ -212,11 +212,23 @@ app.get("/flightDates", async (req, res) => {
       destination: destination
     });
 
-    res.json(JSON.parse(response.body));
+    // Check if the response body is valid JSON
+    let responseBody;
+    try {
+      responseBody = JSON.parse(response.body);
+    } catch (parseError) {
+      console.error("Error parsing response body:", parseError);
+      return res.status(500).json({
+        error: "Invalid response format from Amadeus API"
+      });
+    }
+
+    res.json(responseBody);
   } catch (error) {
     console.error("Error fetching flight dates:", error);
     res.status(500).json({
-      error: "Failed to fetch flight dates"
+      error: "Failed to fetch flight dates",
+      message: error.message // Additional error message for more context
     });
   }
 });
@@ -224,21 +236,109 @@ app.get("/flightDates", async (req, res) => {
 // Nearest Airport 
 // {{base_url}}/airport?latitude=22.8056&longitude=86.2039
 // It fetches the nearest airport from that location
+
 app.get("/airport", async (req, res) => {
+  const { longitude, latitude } = req.query;
 
-  const {longitude,latitude}=req.query;
+  // Validate the presence of longitude and latitude
+  if (!longitude || !latitude) {
+    return res.status(400).json({
+      error: "Longitude and latitude are required"
+    });
+  }
+
+  // Validate that longitude and latitude are numbers
+  const lon = parseFloat(longitude);
+  const lat = parseFloat(latitude);
+
+  if (isNaN(lon) || isNaN(lat)) {
+    return res.status(400).json({
+      error: "Longitude and latitude must be valid numbers"
+    });
+  }
+
   try {
-    
     const response = await amadeus.referenceData.locations.airports.get({
-      longitude : longitude,
-      latitude  : latitude
-    })
+      longitude: lon,
+      latitude: lat
+    });
 
-    res.json(JSON.parse(response.body));
+    // Check if the response body is a valid JSON
+    let responseBody;
+    try {
+      responseBody = JSON.parse(response.body);
+    } catch (parseError) {
+      return res.status(500).json({
+        error: "Failed to parse response from Amadeus API"
+      });
+    }
+
+    res.json(responseBody);
   } catch (error) {
     console.error("Error fetching nearest airport:", error);
+
+    // Handle specific errors from Amadeus API
+    if (error.response) {
+      return res.status(error.response.statusCode || 500).json({
+        error: error.response.body || "Failed to fetch nearest airport"
+      });
+    }
+
     res.status(500).json({
-      error: "Failed to fetch nearest airport "
+      error: "Failed to fetch nearest airport"
+    });
+  }
+});
+
+app.post("/airport", async (req, res) => {
+  const { longitude, latitude } = req.body; // Extract longitude and latitude from request body
+
+  // Validate the presence of longitude and latitude
+  if (!longitude || !latitude) {
+    return res.status(400).json({
+      error: "Longitude and latitude are required"
+    });
+  }
+
+  // Validate that longitude and latitude are numbers
+  const lon = parseFloat(longitude);
+  const lat = parseFloat(latitude);
+
+  if (isNaN(lon) || isNaN(lat)) {
+    return res.status(400).json({
+      error: "Longitude and latitude must be valid numbers"
+    });
+  }
+
+  try {
+    const response = await amadeus.referenceData.locations.airports.get({
+      longitude: lon,
+      latitude: lat
+    });
+
+    // Check if the response body is a valid JSON
+    let responseBody;
+    try {
+      responseBody = JSON.parse(response.body);
+    } catch (parseError) {
+      return res.status(500).json({
+        error: "Failed to parse response from Amadeus API"
+      });
+    }
+
+    res.json(responseBody);
+  } catch (error) {
+    console.error("Error fetching nearest airport:", error);
+
+    // Handle specific errors from Amadeus API
+    if (error.response) {
+      return res.status(error.response.statusCode || 500).json({
+        error: error.response.body || "Failed to fetch nearest airport"
+      });
+    }
+
+    res.status(500).json({
+      error: "Failed to fetch nearest airport"
     });
   }
 });
