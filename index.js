@@ -292,6 +292,8 @@ app.get("/airport", async (req, res) => {
 
 app.post("/airport", async (req, res) => {
   const { longitude, latitude } = req.body; // Extract longitude and latitude from request body
+  console.log("longitude",longitude);
+  console.log("latitude=",latitude);
 
   // Validate the presence of longitude and latitude
   if (!longitude || !latitude) {
@@ -419,11 +421,76 @@ app.post('/book-cheapest-flight', async (req, res) => {
   }
 });
 
+app.get("/monthlyFlightCharges", async (req, res) => {
+  const { origin, destination, month } = req.query;
+
+  if (!origin || !destination || !month) {
+    return res.status(400).json({
+      error: "Missing 'origin', 'destination', or 'month' query parameter"
+    });
+  }
+
+  const [year, monthNum] = month.split('-');
+  const numDays = new Date(year, monthNum, 0).getDate();
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth() + 1;
+  const currentDay = currentDate.getDate();
+
+  // Check if the requested month is in the future
+  if (parseInt(year) < currentYear || (parseInt(year) === currentYear && parseInt(monthNum) < currentMonth)) {
+    return res.status(400).json({
+      error: "The requested month is in the past. Please request a future month."
+    });
+  }
+
+  const aggregatedResults = [];
+
+  try {
+    for (let day = 1; day <= numDays; day++) {
+      const date = `${year}-${monthNum.padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+
+      // Skip past dates if the requested month is the current month
+      if (parseInt(year) === currentYear && parseInt(monthNum) === currentMonth && day < currentDay) {
+        continue;
+      }
+
+      const response = await amadeus.shopping.flightOffersSearch.get({
+        originLocationCode: origin,
+        destinationLocationCode: destination,
+        departureDate: date,
+        adults: 1
+      });
+
+      const flightOffers = response.data;
+
+      if (flightOffers && flightOffers.length > 0) {
+        const minFare = flightOffers.reduce((min, offer) => {
+          const price = parseFloat(offer.price.total);
+          return price < min ? price : min;
+        }, Infinity);
+
+        aggregatedResults.push({ date, minFare });
+      }
+    }
+
+    res.json({
+      month: month,
+      origin: origin,
+      destination: destination,
+      fares: aggregatedResults
+    });
+  } catch (error) {
+    console.error("Error fetching flight offers:", error);
+    res.status(500).json({
+      error: "Failed to fetch flight offers",
+      message: error.message
+    });
+  }
+});
+
 
 // Combined flight search endpoint of amadeus and kiu 
-
-
-
 
 const PORT = process.env.PORT || 8080;
 
