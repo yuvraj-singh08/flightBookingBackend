@@ -235,7 +235,8 @@ app.get("/flightDates", async (req, res) => {
 
 // Nearest Airport 
 // {{base_url}}/airport?latitude=22.8056&longitude=86.2039
-// It fetches the nearest airport from that location
+// It fetches the nearest airport from that location manually
+// without navigator function in frontend
 
 app.get("/airport", async (req, res) => {
   const { longitude, latitude } = req.query;
@@ -290,6 +291,10 @@ app.get("/airport", async (req, res) => {
   }
 });
 
+// Nearest Airport 
+// {{base_url}}/airport
+// It fetches the nearest airport from that location automatically
+// Using navigator function in frontend
 app.post("/airport", async (req, res) => {
   const { longitude, latitude } = req.body; // Extract longitude and latitude from request body
   console.log("longitude",longitude);
@@ -421,16 +426,354 @@ app.post('/book-cheapest-flight', async (req, res) => {
   }
 });
 
+// time taking without promise 
+// app.get("/monthlyFlightCharges", async (req, res) => {
+//   const { origin, destination, month } = req.query;
+
+//   if (!origin || !destination || !month) {
+//     return res.status(400).json({
+//       error: "Missing 'origin', 'destination', or 'month' query parameter"
+//     });
+//   }
+
+//   const [year, monthNum] = month.split('-');
+//   const numDays = new Date(year, monthNum, 0).getDate();
+//   const currentDate = new Date();
+//   const currentYear = currentDate.getFullYear();
+//   const currentMonth = currentDate.getMonth() + 1;
+//   const currentDay = currentDate.getDate();
+
+//   // Check if the requested month is in the future
+//   if (parseInt(year) < currentYear || (parseInt(year) === currentYear && parseInt(monthNum) < currentMonth)) {
+//     return res.status(400).json({
+//       error: "The requested month is in the past. Please request a future month."
+//     });
+//   }
+
+//   const aggregatedResults = [];
+
+//   try {
+//     for (let day = 1; day <= numDays; day++) {
+//       const date = `${year}-${monthNum.padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+
+//       // Skip past dates if the requested month is the current month
+//       if (parseInt(year) === currentYear && parseInt(monthNum) === currentMonth && day < currentDay) {
+//         continue;
+//       }
+
+//       const response = await amadeus.shopping.flightOffersSearch.get({
+//         originLocationCode: origin,
+//         destinationLocationCode: destination,
+//         departureDate: date,
+//         adults: 1
+//       });
+
+//       const flightOffers = response.data;
+
+//       if (flightOffers && flightOffers.length > 0) {
+//         const minFare = flightOffers.reduce((min, offer) => {
+//           const price = parseFloat(offer.price.total);
+//           return price < min ? price : min;
+//         }, Infinity);
+
+//         aggregatedResults.push({ date, minFare });
+//       }
+//     }
+
+//     res.json({
+//       month: month,
+//       origin: origin,
+//       destination: destination,
+//       fares: aggregatedResults
+//     });
+//   } catch (error) {
+//     console.error("Error fetching flight offers:", error);
+//     res.status(500).json({
+//       error: "Failed to fetch flight offers",
+//       message: error.message
+//     });
+//   }
+// });
+
+// error network error but output in 8 seconds 
+// app.get("/monthlyFlightCharges", async (req, res) => {
+//   const { origin, destination, month } = req.query;
+
+//   if (!origin || !destination || !month) {
+//     return res.status(400).json({
+//       error: "Missing 'origin', 'destination', or 'month' query parameter"
+//     });
+//   }
+
+//   const [year, monthNum] = month.split('-');
+//   const numDays = new Date(year, monthNum, 0).getDate();
+//   const currentDate = new Date();
+//   const currentYear = currentDate.getFullYear();
+//   const currentMonth = currentDate.getMonth() + 1;
+//   const currentDay = currentDate.getDate();
+
+//   // Check if the requested month is in the future
+//   if (parseInt(year) < currentYear || (parseInt(year) === currentYear && parseInt(monthNum) < currentMonth)) {
+//     return res.status(400).json({
+//       error: "The requested month is in the past. Please request a future month."
+//     });
+//   }
+
+//   const aggregatedResults = [];
+
+//   try {
+//     const promises = [];
+//     for (let day = 1; day <= numDays; day++) {
+//       const date = `${year}-${monthNum.padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+
+//       // Skip past dates if the requested month is the current month
+//       if (parseInt(year) === currentYear && parseInt(monthNum) === currentMonth && day < currentDay) {
+//         continue;
+//       }
+
+//       // Push a promise to the array with a delay
+//       promises.push(new Promise(resolve => {
+//         setTimeout(async () => {
+//           try {
+//             const response = await amadeus.shopping.flightOffersSearch.get({
+//               originLocationCode: origin,
+//               destinationLocationCode: destination,
+//               departureDate: date,
+//               adults: 1
+//             });
+
+//             const flightOffers = response.data;
+
+//             if (flightOffers && flightOffers.length > 0) {
+//               const minFare = flightOffers.reduce((min, offer) => {
+//                 const price = parseFloat(offer.price.total);
+//                 return price < min ? price : min;
+//               }, Infinity);
+
+//               aggregatedResults.push({ date, minFare });
+//               resolve();
+//             } else {
+//               resolve();
+//             }
+//           } catch (error) {
+//             console.error(`Error fetching flight offers for date ${date}:`, error);
+//             resolve(); // Resolve even if there's an error to continue with other dates
+//           }
+//         }, 100 * day); // 100 ms delay multiplied by day to stagger requests
+//       }));
+//     }
+
+//     // Wait for all promises to resolve
+//     await Promise.all(promises);
+
+//     // Send the aggregated results
+//     res.json({
+//       month: month,
+//       origin: origin,
+//       destination: destination,
+//       fares: aggregatedResults
+//     });
+//   } catch (error) {
+//     console.error("Error fetching flight offers:", error);
+//     res.status(500).json({
+//       error: "Failed to fetch flight offers",
+//       message: error.message
+//     });
+//   }
+// });
+
+
+// 22 seconds par second send pe client network  error
+
+// const {RateLimit}= require('async-sema');
+// app.get("/monthlyFlightCharges", async (req, res) => {
+//   const { origin, destination, month } = req.query;
+
+//   if (!origin || !destination || !month) {
+//     return res.status(400).json({
+//       error: "Missing 'origin', 'destination', or 'month' query parameter"
+//     });
+//   }
+
+//   const [year, monthNum] = month.split('-');
+//   const numDays = new Date(year, monthNum, 0).getDate();
+//   const currentDate = new Date();
+//   const currentYear = currentDate.getFullYear();
+//   const currentMonth = currentDate.getMonth() + 1;
+//   const currentDay = currentDate.getDate();
+
+//   if (parseInt(year) < currentYear || (parseInt(year) === currentYear && parseInt(monthNum) < currentMonth)) {
+//     return res.status(400).json({
+//       error: "The requested month is in the past. Please request a future month."
+//     });
+//   }
+
+//   const aggregatedResults = [];
+//   const rateLimit = RateLimit(1); // Limit to 1 request at a time
+
+//   try {
+//     const promises = [];
+
+//     for (let day = 1; day <= numDays; day++) {
+//       const date = `${year}-${monthNum.padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+
+//       if (parseInt(year) === currentYear && parseInt(monthNum) === currentMonth && day < currentDay) {
+//         continue;
+//       }
+
+//       promises.push((async () => {
+//         await rateLimit();
+
+//         try {
+//           const response = await amadeus.shopping.flightOffersSearch.get({
+//             originLocationCode: origin,
+//             destinationLocationCode: destination,
+//             departureDate: date,
+//             adults: 1
+//           });
+
+//           const flightOffers = response.data;
+
+//           if (flightOffers && flightOffers.length > 0) {
+//             const minFare = flightOffers.reduce((min, offer) => {
+//               const price = parseFloat(offer.price.total);
+//               return price < min ? price : min;
+//             }, Infinity);
+
+//             aggregatedResults.push({ date, minFare });
+//           } else {
+//             console.log(`No flight offers found for ${date}`);
+//           }
+//         } catch (error) {
+//           console.error(`Error fetching flight offers for date ${date}:`, error);
+//         }
+//       })());
+//     }
+
+//     await Promise.all(promises);
+
+//     res.json({
+//       month: month,
+//       origin: origin,
+//       destination: destination,
+//       fares: aggregatedResults
+//     });
+
+//   } catch (error) {
+//     console.error("Error fetching flight offers:", error);
+//     res.status(500).json({
+//       error: "Failed to fetch flight offers",
+//       message: error.message
+//     });
+//   }
+// });
+
+// execution time recorder
+// app.get("/monthlyFlightCharges", async (req, res) => {
+//   const { origin, destination, month } = req.query;
+
+//   if (!origin || !destination || !month) {
+//     return res.status(400).json({
+//       error: "Missing 'origin', 'destination', or 'month' query parameter"
+//     });
+//   }
+
+//   const [year, monthNum] = month.split('-');
+  
+//   // Validate the month format
+//   if (!/^\d{4}-\d{2}$/.test(month)) {
+//     return res.status(400).json({
+//       error: "Invalid 'month' format. Please use 'YYYY-MM'."
+//     });
+//   }
+
+//   const numDays = new Date(year, monthNum, 0).getDate();
+//   const currentDate = new Date();
+//   const currentYear = currentDate.getFullYear();
+//   const currentMonth = currentDate.getMonth() + 1;
+//   const currentDay = currentDate.getDate();
+
+//   // Check if the requested month is in the future
+//   if (parseInt(year) < currentYear || (parseInt(year) === currentYear && parseInt(monthNum) < currentMonth)) {
+//     return res.status(400).json({
+//       error: "The requested month is in the past. Please request a future month."
+//     });
+//   }
+
+//   const aggregatedResults = [];
+
+//   try {
+//     for (let day = 1; day <= numDays; day++) {
+//       const date = `${year}-${monthNum.padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+
+//       // Skip past dates if the requested month is the current month
+//       if (parseInt(year) === currentYear && parseInt(monthNum) === currentMonth && day < currentDay) {
+//         continue;
+//       }
+
+//       const response = await amadeus.shopping.flightOffersSearch.get({
+//         originLocationCode: origin,
+//         destinationLocationCode: destination,
+//         departureDate: date,
+//         adults: 1
+//       });
+
+//       const flightOffers = response.data;
+
+//       if (flightOffers && flightOffers.length > 0) {
+//         const minFare = flightOffers.reduce((min, offer) => {
+//           const price = parseFloat(offer.price.total);
+//           return price < min ? price : min;
+//         }, Infinity);
+
+//         // Ensure minFare is not Infinity (no offers case)
+//         if (minFare !== Infinity) {
+//           aggregatedResults.push({ date, minFare });
+//         }
+//       }
+//     }
+
+//     res.json({
+//       month: month,
+//       origin: origin,
+//       destination: destination,
+//       fares: aggregatedResults
+//     });
+//   } catch (error) {
+//     console.error("Error fetching flight offers:", error);
+//     res.status(500).json({
+//       error: "Failed to fetch flight offers",
+//       message: error.message
+//     });
+//   }
+// });
+
+// pre final 
+
 app.get("/monthlyFlightCharges", async (req, res) => {
+  console.time();
+  const startTime = Date.now();
   const { origin, destination, month } = req.query;
 
   if (!origin || !destination || !month) {
+    const endTime = Date.now();
+    console.log(`Execution time: ${endTime - startTime} ms`);
     return res.status(400).json({
       error: "Missing 'origin', 'destination', or 'month' query parameter"
     });
   }
 
   const [year, monthNum] = month.split('-');
+  
+  // Validate the month format
+  if (!/^\d{4}-\d{2}$/.test(month)) {
+    const endTime = Date.now();
+    console.log(`Execution time: ${endTime - startTime} ms`);
+    return res.status(400).json({
+      error: "Invalid 'month' format. Please use 'YYYY-MM'."
+    });
+  }
+
   const numDays = new Date(year, monthNum, 0).getDate();
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
@@ -439,6 +782,8 @@ app.get("/monthlyFlightCharges", async (req, res) => {
 
   // Check if the requested month is in the future
   if (parseInt(year) < currentYear || (parseInt(year) === currentYear && parseInt(monthNum) < currentMonth)) {
+    const endTime = Date.now();
+    console.log(`Execution time: ${endTime - startTime} ms`);
     return res.status(400).json({
       error: "The requested month is in the past. Please request a future month."
     });
@@ -470,9 +815,15 @@ app.get("/monthlyFlightCharges", async (req, res) => {
           return price < min ? price : min;
         }, Infinity);
 
-        aggregatedResults.push({ date, minFare });
+        // Ensure minFare is not Infinity (no offers case)
+        if (minFare !== Infinity) {
+          aggregatedResults.push({ date, minFare });
+        }
       }
     }
+
+    const endTime = Date.now();
+    console.log(`Execution time: ${endTime - startTime} ms`);
 
     res.json({
       month: month,
@@ -481,6 +832,9 @@ app.get("/monthlyFlightCharges", async (req, res) => {
       fares: aggregatedResults
     });
   } catch (error) {
+    const endTime = Date.now();
+    console.log(`Execution time: ${endTime - startTime} ms`);
+
     console.error("Error fetching flight offers:", error);
     res.status(500).json({
       error: "Failed to fetch flight offers",
@@ -490,11 +844,10 @@ app.get("/monthlyFlightCharges", async (req, res) => {
 });
 
 
-// Combined flight search endpoint of amadeus and kiu 
 
-const PORT = process.env.PORT || 8080;
+// // // Start the server
 
+const PORT = process.env.port || 8080;
 app.listen(PORT, () => {
     console.log(`> App running on port ${PORT} ...`);
 });
-
